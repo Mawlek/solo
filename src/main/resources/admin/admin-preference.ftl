@@ -3,18 +3,12 @@
     Solo - A small and beautiful blogging system written in Java.
     Copyright (c) 2010-present, b3log.org
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Solo is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+            http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
 
 -->
 <div id="tabPreference" class="sub-tabs fn__clear">
@@ -32,6 +26,11 @@
         <li>
             <div id="tabPreference_setting">
                 <a href="#tools/preference/setting">${paramSettingsLabel}</a>
+            </div>
+        </li>
+        <li>
+            <div id="tabPreference_markdown">
+                <a href="#tools/preference/markdown">Markdown</a>
             </div>
         </li>
     </ul>
@@ -177,6 +176,12 @@
                         <input id="pullGitHub" type="checkbox" class="normalInput"/>
                     </div>
                 </label>
+                <label>
+                    <div class="fn__flex-inline">
+                        ${showCodeBlockLnLabel}
+                        <input id="showCodeBlockLn" type="checkbox" class="normalInput"/>
+                    </div>
+                </label>
             </div>
             <div class="fn__margin12"></div>
             <div class="fn__flex-1">
@@ -235,6 +240,58 @@
         <button id="preferenceSignButton3">${signLabel}3</button>
         <textarea rows="8" id="preferenceSign3"></textarea><br><br>
         <button onclick="admin.preference.update()" class="fn__right">${updateLabel}</button>
+        <div class="fn__clear"></div>
+    </div>
+    <div id="tabPreferencePanel_markdown" class="fn__none form">
+        <button class="fn__right" onclick="admin.preference.update()">${updateLabel}</button>
+        <div class="fn__clear"></div>
+
+        <label>${editorModeLabel}</label>
+        <div class="fn__flex">
+            <label class="checkbox fn__flex-1">
+                <input name="editorMode" type="radio" value="wysiwyg" checked>
+                <span>&nbsp;${editorModeWYSIWYGLabel}</span>
+            </label>
+            <label class="checkbox fn__flex-1">
+                <input name="editorMode" type="radio" value="ir">
+                <span>&nbsp;${editorModeIRLabel}</span>
+            </label>
+            <label class="checkbox fn__flex-1">
+                <input name="editorMode" type="radio" value="sv">
+                <span>&nbsp;${editorModeSVLabel}</span>
+            </label>
+        </div>
+
+        <#if !luteAvailable>
+            <div class="fn__clear">
+                ${luteHTTPLabel}
+            </div>
+        </#if>
+        <label class="checkbox">
+            <input id="footnotes" type="checkbox" class="normalInput"/>
+            <span>&nbsp;${supportFootnotesLabel}</span>
+        </label>
+        <label class="checkbox">
+            <input id="showToC" type="checkbox" class="normalInput"/>
+            <span>&nbsp;${supportToCLabel}</span>
+        </label>
+        <label class="checkbox">
+            <input id="autoSpace" type="checkbox" class="normalInput"/>
+            <span>&nbsp;${autoSpaceLabel}</span>
+        </label>
+        <label class="checkbox">
+            <input id="fixTermTypo" type="checkbox" class="normalInput"/>
+            <span>&nbsp;${fixTermTypoLabel}</span>
+        </label>
+        <label class="checkbox">
+            <input id="chinesePunct" type="checkbox" class="normalInput"/>
+            <span>&nbsp;${chinesePunctLabel}</span>
+        </label>
+        <label class="checkbox">
+            <input id="inlineMathAllowDigitAfterOpenMarker" type="checkbox" class="normalInput"/>
+            <span>&nbsp;${inlineMathAllowDigitAfterOpenMarkerLabel}</span>
+        </label>
+        <button class="fn__right" onclick="admin.preference.update()">${updateLabel}</button>
         <div class="fn__clear"></div>
     </div>
 </div>

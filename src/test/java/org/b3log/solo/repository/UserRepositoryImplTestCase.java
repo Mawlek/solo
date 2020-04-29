@@ -2,18 +2,12 @@
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-present, b3log.org
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Solo is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *         http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  */
 package org.b3log.solo.repository;
 
@@ -61,24 +55,7 @@ public final class UserRepositoryImplTestCase extends AbstractTestCase {
         userRepository.add(another);
         transaction.commit();
 
-        Assert.assertNull(userRepository.getAdmin());
-
-        JSONObject admin = new JSONObject();
-        admin.put(User.USER_NAME, "test");
-        admin.put(User.USER_URL, "https://b3log.org");
-        admin.put(User.USER_ROLE, Role.ADMIN_ROLE);
-        admin.put(UserExt.USER_AVATAR, "");
-        admin.put(UserExt.USER_GITHUB_ID, "");
-        admin.put(UserExt.USER_B3_KEY, "");
-
-        transaction = userRepository.beginTransaction();
-        userRepository.add(admin);
-        transaction.commit();
-
-        admin = userRepository.getAdmin();
-
-        Assert.assertNotNull(admin);
-        Assert.assertEquals("test", admin.optString(User.USER_NAME));
+        Assert.assertNotNull(userRepository.getAdmin());
 
         final JSONObject result = userRepository.get(new Query().setFilter(
                 new PropertyFilter(User.USER_NAME, FilterOperator.EQUAL, "test1")));

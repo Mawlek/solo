@@ -2,29 +2,24 @@
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-present, b3log.org
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Solo is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *         http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  */
 package org.b3log.solo.service;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.ioc.Inject;
-import org.b3log.latke.logging.Level;
-import org.b3log.latke.logging.Logger;
 import org.b3log.latke.service.annotation.Service;
 import org.b3log.latke.util.Strings;
 import org.b3log.solo.model.Article;
@@ -40,7 +35,7 @@ import java.util.*;
  * Import service.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.1.6, Nov 22, 2019
+ * @version 1.0.1.6, Apr 23, 2020
  * @since 2.2.0
  */
 @Service
@@ -49,7 +44,7 @@ public class ImportService {
     /**
      * Logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(ImportService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ImportService.class);
 
     /**
      * Default tag.
@@ -97,7 +92,7 @@ public class ImportService {
             int succCnt = 0, failCnt = 0;
             final Set<String> failSet = new TreeSet<>();
             final Collection<File> mds = FileUtils.listFiles(markdownsPath, new String[]{"md"}, true);
-            if (null == mds || mds.isEmpty()) {
+            if (mds.isEmpty()) {
                 return;
             }
 
@@ -191,6 +186,10 @@ public class ImportService {
 
         final Date date = parseDate(elems);
         ret.put(Article.ARTICLE_CREATED, date.getTime());
+
+        // 文章 id 必须使用存档时间戳，否则生成的存档时间会是当前时间
+        // 导入 Markdown 文件存档时间问题 https://github.com/88250/solo/issues/112
+        ret.put(Keys.OBJECT_ID, String.valueOf(date.getTime()));
 
         final String permalink = (String) elems.get("permalink");
         if (StringUtils.isNotBlank(permalink)) {

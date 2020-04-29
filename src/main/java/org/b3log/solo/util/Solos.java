@@ -2,18 +2,12 @@
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-present, b3log.org
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Solo is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *         http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  */
 package org.b3log.solo.util;
 
@@ -21,12 +15,13 @@ import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.http.*;
 import org.b3log.latke.ioc.BeanManager;
-import org.b3log.latke.logging.Level;
-import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Pagination;
 import org.b3log.latke.model.Role;
 import org.b3log.latke.model.User;
@@ -59,7 +54,7 @@ public final class Solos {
     /**
      * Logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(Solos.class);
+    private static final Logger LOGGER = LogManager.getLogger(Solos.class);
 
     /**
      * Favicon API.
@@ -187,7 +182,7 @@ public final class Solos {
      */
     public static JSONObject getUploadToken(final RequestContext context) {
         try {
-            final JSONObject currentUser = getCurrentUser(context.getRequest(), context.getResponse());
+            final JSONObject currentUser = getCurrentUser(context);
             if (null == currentUser) {
                 return null;
             }
@@ -274,16 +269,17 @@ public final class Solos {
     /**
      * Gets the current logged-in user.
      *
-     * @param request  the specified request
-     * @param response the specified response
+     * @param context the specified context
      * @return the current logged-in user, returns {@code null} if not found
      */
-    public static JSONObject getCurrentUser(final Request request, final Response response) {
+    public static JSONObject getCurrentUser(final RequestContext context) {
+        final Request request = context.getRequest();
         final Set<Cookie> cookies = request.getCookies();
         if (cookies.isEmpty()) {
             return null;
         }
 
+        final Response response = context.getResponse();
         final BeanManager beanManager = BeanManager.getInstance();
         final UserRepository userRepository = beanManager.getReference(UserRepository.class);
         try {
@@ -375,7 +371,7 @@ public final class Solos {
      * @return {@code true} if the current request is made by logged in user, returns {@code false} otherwise
      */
     public static boolean isLoggedIn(final RequestContext context) {
-        return null != Solos.getCurrentUser(context.getRequest(), context.getResponse());
+        return null != Solos.getCurrentUser(context);
     }
 
     /**
@@ -386,7 +382,7 @@ public final class Solos {
      * administrator, returns {@code false} otherwise
      */
     public static boolean isAdminLoggedIn(final RequestContext context) {
-        final JSONObject user = getCurrentUser(context.getRequest(), context.getResponse());
+        final JSONObject user = getCurrentUser(context);
         if (null == user) {
             return false;
         }
@@ -434,8 +430,7 @@ public final class Solos {
             }
         }
 
-        final Response response = context.getResponse();
-        final JSONObject currentUser = getCurrentUser(request, response);
+        final JSONObject currentUser = getCurrentUser(context);
 
         return !(null != currentUser && !Role.VISITOR_ROLE.equals(currentUser.optString(User.USER_ROLE)));
     }

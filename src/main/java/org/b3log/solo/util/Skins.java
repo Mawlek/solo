@@ -2,18 +2,12 @@
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-present, b3log.org
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Solo is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *         http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  */
 package org.b3log.solo.util;
 
@@ -21,14 +15,15 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.http.Cookie;
 import org.b3log.latke.http.Request;
 import org.b3log.latke.http.RequestContext;
 import org.b3log.latke.ioc.BeanManager;
-import org.b3log.latke.logging.Level;
-import org.b3log.latke.logging.Logger;
 import org.b3log.latke.service.LangPropsService;
 import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.util.Locales;
@@ -48,7 +43,7 @@ import java.util.stream.Stream;
  * Skin utilities.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.1.6.9, Nov 22, 2019
+ * @version 1.1.7.0, Jan 14, 2020
  * @since 0.3.1
  */
 public final class Skins {
@@ -56,7 +51,7 @@ public final class Skins {
     /**
      * Logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(Skins.class);
+    private static final Logger LOGGER = LogManager.getLogger(Skins.class);
 
     /**
      * FreeMarker configuration.
@@ -162,7 +157,7 @@ public final class Skins {
                 final String country = Locales.getCountry(localeString);
                 final InputStream inputStream = Skins.class.getResourceAsStream("/skins/" + currentSkinDirName + "/lang/lang_" + language + '_' + country + ".properties");
                 if (null != inputStream) {
-                    LOGGER.log(Level.DEBUG, "Loading skin [dirName={0}, locale={1}]", currentSkinDirName, localeString);
+                    LOGGER.log(Level.DEBUG, "Loading skin [dirName={}, locale={}]", currentSkinDirName, localeString);
                     final Properties props = new Properties();
                     props.load(inputStream);
                     inputStream.close();
@@ -174,7 +169,7 @@ public final class Skins {
                     }
 
                     LANG_MAP.put(langName, langs);
-                    LOGGER.log(Level.DEBUG, "Loaded skin [dirName={0}, locale={1}, keyCount={2}]", currentSkinDirName, localeString, langs.size());
+                    LOGGER.log(Level.DEBUG, "Loaded skin [dirName={}, locale={}, keyCount={}]", currentSkinDirName, localeString, langs.size());
                 }
             }
 
@@ -220,7 +215,8 @@ public final class Skins {
             final Stream<Path> walk = Files.walk(resourcePath, 1);
             for (final Iterator<Path> it = walk.iterator(); it.hasNext(); ) {
                 final Path file = it.next().getFileName();
-                final String fileName = file.toString();
+                String fileName = file.toString();
+                fileName = StringUtils.replace(fileName, "/", "");
                 if (fileName.startsWith(".") || fileName.endsWith(".md") || "skins".equals(fileName)) {
                     continue;
                 }

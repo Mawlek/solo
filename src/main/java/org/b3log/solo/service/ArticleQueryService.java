@@ -2,27 +2,23 @@
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-present, b3log.org
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Solo is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *         http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  */
 package org.b3log.solo.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.b3log.latke.Keys;
+import org.b3log.latke.Latkes;
 import org.b3log.latke.http.RequestContext;
 import org.b3log.latke.ioc.Inject;
-import org.b3log.latke.logging.Level;
-import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Pagination;
 import org.b3log.latke.model.Role;
 import org.b3log.latke.model.User;
@@ -48,9 +44,9 @@ import java.util.*;
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author <a href="https://hacpai.com/member/armstrong">ArmstrongCN</a>
- * @author <a href="http://zephyr.b3log.org">Zephyr</a>
+ * @author <a href="https://hacpai.com/member/ZephyrJung">Zephyr</a>
  * @author <a href="http://vanessa.b3log.org">Liyuan Li</a>
- * @version 1.3.5.0, Oct 14, 2019
+ * @version 1.3.6.0, Jan 15, 2020
  * @since 0.3.5
  */
 @Service
@@ -59,7 +55,7 @@ public class ArticleQueryService {
     /**
      * Logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(ArticleQueryService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ArticleQueryService.class);
 
     /**
      * User repository.
@@ -325,7 +321,7 @@ public class ArticleQueryService {
             final String userId = article.getString(Article.ARTICLE_AUTHOR_ID);
             JSONObject ret = userRepository.get(userId);
             if (null == ret) {
-                LOGGER.log(Level.WARN, "Gets author of article failed, assumes the administrator is the author of this article [id={0}]",
+                LOGGER.log(Level.WARN, "Gets author of article failed, assumes the administrator is the author of this article [id={}]",
                         article.getString(Keys.OBJECT_ID));
                 // This author may be deleted by admin, use admin as the author of this article
                 ret = userRepository.getAdmin();
@@ -333,7 +329,7 @@ public class ArticleQueryService {
 
             return ret;
         } catch (final Exception e) {
-            LOGGER.log(Level.ERROR, "Gets author of article [id={0}] failed", article.optString(Keys.OBJECT_ID));
+            LOGGER.log(Level.ERROR, "Gets author of article [id={}] failed", article.optString(Keys.OBJECT_ID));
 
             throw new ServiceException(e);
         }
@@ -362,7 +358,7 @@ public class ArticleQueryService {
             }
         }
 
-        LOGGER.log(Level.WARN, "Can not find the sign [id={0}], returns a default sign [id=1]", signId);
+        LOGGER.log(Level.WARN, "Can not find the sign [id={}], returns a default sign [id=1]", signId);
 
         return defaultSign;
     }
@@ -460,7 +456,7 @@ public class ArticleQueryService {
             article.remove(Article.ARTICLE_VIEW_COUNT);
             article.remove(Article.ARTICLE_RANDOM_DOUBLE);
 
-            LOGGER.log(Level.DEBUG, "Got an article [id={0}]", articleId);
+            LOGGER.log(Level.DEBUG, "Got an article [id={}]", articleId);
 
             return ret;
         } catch (final Exception e) {
@@ -641,12 +637,13 @@ public class ArticleQueryService {
      */
     public List<JSONObject> getArticlesByArchiveDate(final String archiveDateId, final int currentPageNum, final int pageSize) throws ServiceException {
         try {
+            final String tablePrefix = Latkes.getLocalProperty("jdbc.tablePrefix") + "_";
             final List<JSONObject> ret = new ArrayList<>();
             final String query = "SELECT\n" +
                     "\t*\n" +
                     "FROM\n" +
-                    "\tb3_solo_article AS a,\n" +
-                    "\tb3_solo_archivedate_article aa\n" +
+                    "\t" + tablePrefix + "article AS a,\n" +
+                    "\t" + tablePrefix + "archivedate_article aa\n" +
                     "WHERE\n" +
                     "\taa.archiveDate_oId = ?\n" +
                     "AND a.oId = aa.article_oId\n" +

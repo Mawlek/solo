@@ -2,18 +2,12 @@
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-present, b3log.org
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Solo is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *         http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  */
 package org.b3log.solo.processor.console;
 
@@ -21,18 +15,18 @@ import jodd.io.ZipUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.event.Event;
 import org.b3log.latke.event.EventManager;
 import org.b3log.latke.http.RequestContext;
 import org.b3log.latke.http.Response;
-import org.b3log.latke.http.annotation.Before;
 import org.b3log.latke.http.renderer.AbstractFreeMarkerRenderer;
 import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.ioc.Singleton;
-import org.b3log.latke.logging.Level;
-import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Plugin;
 import org.b3log.latke.model.User;
 import org.b3log.latke.plugin.ViewLoadEventData;
@@ -53,23 +47,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
  * Admin console render processing.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.7.0.17, Dec 15, 2019
+ * @version 2.0.0.0, Feb 9, 2020
  * @since 0.4.1
  */
 @Singleton
-@Before(ConsoleAuthAdvice.class)
 public class AdminConsole {
 
     /**
      * Logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(AdminConsole.class);
+    private static final Logger LOGGER = LogManager.getLogger(AdminConsole.class);
 
     /**
      * Language service.
@@ -118,7 +112,7 @@ public class AdminConsole {
         final Map<String, String> langs = langPropsService.getAll(Latkes.getLocale());
         final Map<String, Object> dataModel = renderer.getDataModel();
         dataModel.putAll(langs);
-        final JSONObject currentUser = Solos.getCurrentUser(context.getRequest(), context.getResponse());
+        final JSONObject currentUser = Solos.getCurrentUser(context);
         final String userName = currentUser.optString(User.USER_NAME);
         dataModel.put(User.USER_NAME, userName);
         final String roleName = currentUser.optString(User.USER_ROLE);
@@ -128,6 +122,13 @@ public class AdminConsole {
 
         try {
             final JSONObject preference = optionQueryService.getPreference();
+            // 支持配置编辑器模式 https://github.com/88250/solo/issues/95
+            String editorMode = preference.optString(Option.ID_C_EDITOR_MODE);
+            if (StringUtils.isBlank(editorMode)) {
+                editorMode = "wysiwyg";
+            }
+            dataModel.put(Option.ID_C_EDITOR_MODE, editorMode);
+
             dataModel.put(Option.ID_C_LOCALE_STRING, preference.getString(Option.ID_C_LOCALE_STRING));
             dataModel.put(Option.ID_C_BLOG_TITLE, preference.getString(Option.ID_C_BLOG_TITLE));
             dataModel.put(Option.ID_C_BLOG_SUBTITLE, preference.getString(Option.ID_C_BLOG_SUBTITLE));
@@ -139,7 +140,6 @@ public class AdminConsole {
             final JSONObject skin = optionQueryService.getSkin();
             dataModel.put(Option.CATEGORY_C_SKIN, skin.optString(Option.ID_C_SKIN_DIR_NAME));
             Keys.fillRuntime(dataModel);
-            dataModelService.fillMinified(dataModel);
             dataModel.put(Common.LUTE_AVAILABLE, Markdowns.LUTE_AVAILABLE);
             // 内置 HTTPS+CDN 文件存储 https://github.com/b3log/solo/issues/12556
             dataModel.put(Common.UPLOAD_TOKEN, "");
@@ -215,6 +215,7 @@ public class AdminConsole {
             timeZoneIdOptions.append(option);
         }
 
+        dataModel.put(Common.LUTE_AVAILABLE, Markdowns.LUTE_AVAILABLE);
         dataModel.put("timeZoneIdOptions", timeZoneIdOptions.toString());
         fireFreeMarkerActionEvent(templateName, dataModel);
     }
@@ -280,7 +281,7 @@ public class AdminConsole {
 
         try {
             final JSONObject json = exportService.getJSONs();
-            final byte[] data = json.toString(4).getBytes("UTF-8");
+            final byte[] data = json.toString(4).getBytes(StandardCharsets.UTF_8);
 
             try (final OutputStream output = new FileOutputStream(localFile)) {
                 IOUtils.write(data, output);
